@@ -1,0 +1,31 @@
+[package]
+name = "rust-fltk-todolist"
+version = "0.1.0"
+authors = ["Enrique Marín <enriquemarin_sierra@hotmail.com>"]
+edition = "2021"
+description = "Fltk todolist demo app"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.38"
+fltk = "1.4.29"
+fltk-theme = "0.7.2"
+resolve-path = "0.1.0"
+rmp-serde = "1.3.0"
+rust-embed = "8.3.0"
+serde = { version = "1.0.200", features = ["derive"] }
+
+[package.metadata.bundle]
+name = "Todolist Fltk demo application"
+identifier = "com.emarifer.fltk-test"
+description = "Fltk todolist demo app"
+category = "Development"
+icon = ["./assets/ferris-logo.png"]
+
+# find the package to uninstall;
+# sudo dpkg -l '*fltk*'
+# uninstall:
+# sudo dpkg -P ...
+# install:
+# sudo dpkg -i target/release/bundle/deb/fltk-test_0.1.0_amd64.deb
