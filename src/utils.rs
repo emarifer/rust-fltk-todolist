@@ -38,28 +38,15 @@ pub struct MainWindow {
     pub update_button: Button,
 }
 
-/// Load data from storage file
-pub fn load_list_items() -> Vec<ListItem> {
-    let data: Vec<u8> = fs::read(DATA_PATH.resolve())
-        .map_err(|err| eprintln!("{err:?}"))
-        .unwrap_or_default();
-    // Bail since we found no data.
-    if data.is_empty() {
-        return vec![];
-    }
-
-    rmp_serde::from_slice::<Vec<ListItem>>(&data).unwrap()
-}
-
 /// Save the data to the storage file
-pub fn dump_list_items(model: &Vec<ListItem>) {
+fn dump_list_items(model: &Vec<ListItem>) {
     fs::write(DATA_PATH.resolve(), rmp_serde::to_vec(model).unwrap())
         .map_err(|err| eprintln!("{err:?}"))
         .unwrap_or_default();
 }
 
 /// Gets the current date and time
-pub fn get_datetime() -> String {
+fn get_datetime() -> String {
     let current_local: DateTime<Local> = Local::now();
     current_local.format("%d-%m-%Y • %H:%M:%S").to_string()
 }
@@ -135,6 +122,19 @@ pub fn draw_ui(sender: Sender<Message>) -> MainWindow {
         list_browser,
         update_button,
     }
+}
+
+/// Load data from storage file
+pub fn load_list_items() -> Vec<ListItem> {
+    let data: Vec<u8> = fs::read(DATA_PATH.resolve())
+        .map_err(|err| eprintln!("{err:?}"))
+        .unwrap_or_default();
+    // Bail since we found no data.
+    if data.is_empty() {
+        return vec![];
+    }
+
+    rmp_serde::from_slice::<Vec<ListItem>>(&data).unwrap()
 }
 
 /// Create the message waiting loop
