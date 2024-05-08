@@ -9,8 +9,7 @@ use rust_embed::RustEmbed;
 
 use crate::{
     constants::WIDGET_PADDING,
-    models::ListItem,
-    utils::{draw_ui, load_list_items, message_waiting_loop, MainWindow, Message},
+    utils::{draw_ui, message_waiting_loop, MainWindow, Message},
 };
 
 #[derive(RustEmbed)]
@@ -19,7 +18,6 @@ struct Asset;
 
 pub struct TodolistRS {
     pub a: App,
-    pub model: Vec<ListItem>,
     pub m_window: MainWindow,
     pub r: Receiver<Message>,
     pub s: Sender<Message>,
@@ -50,23 +48,12 @@ impl TodolistRS {
             m_window.create_button.y() + m_window.create_button.height() + WIDGET_PADDING,
         );
 
-        let model = load_list_items();
-        // ↓↓ reverse vector ↓↓
-        // .into_iter()
-        // .rev()
-        // .collect::<Vec<ListItem>>();
         s.send(Message::Filter);
 
         wind.end();
         wind.show();
 
-        Self {
-            a,
-            m_window,
-            model,
-            r,
-            s,
-        }
+        Self { a, m_window, r, s }
     }
 
     pub fn run(&mut self) {

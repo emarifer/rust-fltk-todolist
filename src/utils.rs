@@ -51,6 +51,19 @@ fn get_datetime() -> String {
     current_local.format("%d-%m-%Y • %H:%M:%S").to_string()
 }
 
+/// Load data from storage file
+fn load_list_items() -> Vec<ListItem> {
+    let data: Vec<u8> = fs::read(DATA_PATH.resolve())
+        .map_err(|err| eprintln!("{err:?}"))
+        .unwrap_or_default();
+    // Bail since we found no data.
+    if data.is_empty() {
+        return vec![];
+    }
+
+    rmp_serde::from_slice::<Vec<ListItem>>(&data).unwrap()
+}
+
 /// Configure UI Items
 pub fn draw_ui(sender: Sender<Message>) -> MainWindow {
     let mut filter_input = Input::default()
@@ -124,19 +137,6 @@ pub fn draw_ui(sender: Sender<Message>) -> MainWindow {
     }
 }
 
-/// Load data from storage file
-pub fn load_list_items() -> Vec<ListItem> {
-    let data: Vec<u8> = fs::read(DATA_PATH.resolve())
-        .map_err(|err| eprintln!("{err:?}"))
-        .unwrap_or_default();
-    // Bail since we found no data.
-    if data.is_empty() {
-        return vec![];
-    }
-
-    rmp_serde::from_slice::<Vec<ListItem>>(&data).unwrap()
-}
-
 /// Create the message waiting loop
 /// and start the application
 pub fn message_waiting_loop(app: &mut TodolistRS) {
@@ -150,12 +150,18 @@ pub fn message_waiting_loop(app: &mut TodolistRS) {
         update_button,
     } = &mut app.m_window;
 
+    let mut model = load_list_items();
+    // ↓↓ reverse vector ↓↓
+    // .into_iter()
+    // .rev()load_list_items();
+    // .collect::<Vec<ListItem>>();
+
     while app.a.wait() {
         match app.r.recv() {
             Some(Message::Create) => {
                 // Do not allow empty TO-DO
                 if description_input.value().trim() != "" {
-                    app.model.insert(
+                    model.insert(
                         0,
                         ListItem {
                             completed: false,
@@ -164,21 +170,17 @@ pub fn message_waiting_loop(app: &mut TodolistRS) {
                         },
                     );
                 }
-                dump_list_items(&app.model);
+                dump_list_items(&model);
                 description_input.set_value("");
                 app.s.send(Message::Filter);
             }
             Some(Message::Update) => {
                 let selected_name = list_browser.text(list_browser.value()).unwrap();
                 let datetime = selected_name.split("\t").collect::<Vec<&str>>()[1];
-                let index = app
-                    .model
-                    .iter()
-                    .position(|s| s.datetime == datetime)
-                    .unwrap();
-                let item = &mut app.model[index];
+                let index = model.iter().position(|s| s.datetime == datetime).unwrap();
+                let item = &mut model[index];
                 item.completed = completed_input.value();
-                dump_list_items(&app.model);
+                dump_list_items(&model);
                 // description_input.set_value("");
                 app.s.send(Message::Filter);
             }
@@ -186,13 +188,9 @@ pub fn message_waiting_loop(app: &mut TodolistRS) {
                 let selected_name = list_browser.text(list_browser.value()).unwrap();
                 let datetime = selected_name.split("\t").collect::<Vec<&str>>()[1];
                 // println!("{datetime}");
-                let index = app
-                    .model
-                    .iter()
-                    .position(|s| s.datetime == datetime)
-                    .unwrap();
-                app.model.remove(index);
-                dump_list_items(&app.model);
+                let index = model.iter().position(|s| s.datetime == datetime).unwrap();
+                model.remove(index);
+                dump_list_items(&model);
                 app.s.send(Message::Filter);
                 app.s.send(Message::Select)
             }
@@ -211,15 +209,11 @@ pub fn message_waiting_loop(app: &mut TodolistRS) {
                     completed_input.activate();
                     let selected_name = list_browser.text(list_browser.value()).unwrap();
                     let datetime = selected_name.split("\t").collect::<Vec<&str>>()[1];
-                    let index = app
-                        .model
-                        .iter()
-                        .position(|s| s.datetime == datetime)
-                        .unwrap();
-                    completed_input.set_value(app.model[index].completed);
-                    description_input.set_value(&app.model[index].description);
+                    let index = model.iter().position(|s| s.datetime == datetime).unwrap();
+                    completed_input.set_value(model[index].completed);
+                    description_input.set_value(&model[index].description);
                     description_input.set_readonly(true);
-                    description_input.set_tooltip(&app.model[index].description);
+                    description_input.set_tooltip(&model[index].description);
                     update_button.activate();
                     delete_button.activate();
                 }
@@ -228,7 +222,7 @@ pub fn message_waiting_loop(app: &mut TodolistRS) {
                 let prefix = filter_input.value().to_lowercase();
                 list_browser.clear();
                 list_browser.add("@C221DESCRIPTION\t@C221DATETIME\t@C221COMPLETED");
-                for item in &app.model {
+                for item in &model {
                     if item.description.to_lowercase().starts_with(&prefix) {
                         let content = format!(
                             "{}\t{}\t{}",
