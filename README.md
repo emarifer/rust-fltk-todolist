@@ -55,7 +55,7 @@ Here is a [list](https://en.wikipedia.org/wiki/FLTK#Use) of software using FLTK.
 - [FLTK-RS-Examples](https://github.com/wyhinton/FLTK-RS-Examples)
 - Erco's FLTK cheat [page](http://seriss.com/people/erco/fltk/), which is an excellent FLTK C++ reference.
 
-#### In conclusion:
+#### Conclusion:
 
 Use this library if you want something very, very light, quick to code and compile... and you like somewhat minimalist interfaces like me.🤓
 
@@ -73,9 +73,9 @@ cargo run
 
 <div align="center">
 
-###### Application window that displays a pop-up window corresponding to the description of an item in the ToDo list:
+###### Application window showing pop-up corresponding to the description of an item in the ToDo list:
 
-<img src="assets/screenshot-01.png" width="67%">
+<img src="assets/screenshot-01.png" width="75%">
 
 </div>
 

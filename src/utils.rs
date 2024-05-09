@@ -5,7 +5,7 @@ use fltk::{
     app::Sender,
     browser::HoldBrowser,
     button::{Button, CheckButton},
-    enums::CallbackTrigger,
+    enums::{CallbackTrigger, Color},
     frame,
     input::Input,
     prelude::{BrowserExt, ButtonExt, InputExt, WidgetExt},
@@ -125,6 +125,15 @@ pub fn draw_ui(sender: Sender<Message>) -> MainWindow {
     delete_button.set_frame(widget_themes::OS_MINI_BUTTON_UP_BOX);
     delete_button.emit(sender, Message::Delete);
     delete_button.deactivate();
+
+    // Set text info: "Quit the application by push 'Escape' key"
+    let mut label = frame::Frame::default().with_pos(
+        delete_button.x() + delete_button.width() + WIDGET_PADDING * 36,
+        delete_button.y() + WIDGET_PADDING,
+    );
+    label.set_label("Quit the application by push 'Escape' key");
+    label.set_label_color(Color::by_index(52));
+    label.set_label_size(12);
 
     MainWindow {
         completed_input,

@@ -1,7 +1,8 @@
 use fltk::{
-    app::{channel, App, Receiver, Scheme, Sender},
+    app::{channel, event_key, App, Receiver, Scheme, Sender},
+    enums::{Event, Key},
     image,
-    prelude::{GroupExt, WidgetExt, WindowExt},
+    prelude::{GroupExt, WidgetBase, WidgetExt, WindowExt},
     window::Window,
 };
 use fltk_theme::{ThemeType, WidgetScheme, WidgetTheme};
@@ -41,7 +42,7 @@ impl TodolistRS {
 
         let (s, r) = channel::<Message>();
 
-        let m_window = draw_ui(s);
+        let mut m_window = draw_ui(s);
 
         wind.set_size(
             m_window.description_input.x() + m_window.description_input.width() + WIDGET_PADDING,
@@ -53,6 +54,21 @@ impl TodolistRS {
         wind.end();
         wind.show();
 
+        // set_focus(&wind);
+
+        // Quit the application by push 'Escape'
+        // ↓↓ SEE NOTE -2 BELOW ↓↓
+        m_window.filter_input.handle(move |_, event| match event {
+            Event::KeyDown => {
+                if event_key() == Key::Escape {
+                    // println!("`Escape` Key Down");
+                    a.quit();
+                }
+                false
+            }
+            _ => false,
+        });
+
         Self { a, m_window, r, s }
     }
 
@@ -63,6 +79,9 @@ impl TodolistRS {
 
 /*
 https://docs.rs/fltk/latest/src/temp_converter2/temp_converter2.rs.html#84
+
+NOTE-2:
+https://docs.rs/fltk/latest/src/spreadsheet/spreadsheet.rs.html#160
 
 cargo watch -w src -x 'run --bin crud'
 */
